@@ -1,0 +1,343 @@
+<title>Menu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus+SC&display=swap">
+<style>
+/* Layout: a single menu card on a leather ground. Card holds a masthead, two tabs, a filter strip,
+   then "courses" (days) of items set with dotted leaders, like a printed prix-fixe card. */
+:root{
+  --ground:#1f3a2e;      /* bottle-green leather behind the card */
+  --card:#fbf8f0;        /* ivory card stock */
+  --ink:#1c2a23;         /* green-black ink */
+  --muted:#5d6b62;       /* faded ink */
+  --brass:#9a7426;       /* foil accents, rules */
+  --rule:#d9cfb6;        /* hairline on card */
+  --chip:#efe8d6;
+  --ok:#2f6b47; --warn:#8a5a12;
+  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
+  --caps:"Marcellus SC","Trajan Pro",Georgia,serif;
+  --body:"EB Garamond",Garamond,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0c1511;--card:#14211b;--ink:#ece4cf;--muted:#a6ab9c;--brass:#c9a24f;--rule:#2f4237;--chip:#1d2d25;--ok:#7fc29a;--warn:#e0ad5c;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#0c1511;--card:#14211b;--ink:#ece4cf;--muted:#a6ab9c;--brass:#c9a24f;--rule:#2f4237;--chip:#1d2d25;--ok:#7fc29a;--warn:#e0ad5c;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px;
+  background-image:radial-gradient(ellipse at 50% -10%,color-mix(in srgb,var(--brass) 14%,transparent),transparent 60%)}
+.card{max-width:760px;margin:0 auto;background:var(--card);border-radius:3px;position:relative;
+  padding:clamp(22px,5vw,56px) clamp(18px,5vw,64px) 40px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.card::before{content:"";position:absolute;inset:10px;border:1px solid var(--brass);outline:1px solid var(--brass);outline-offset:-5px;pointer-events:none;border-radius:2px}
+@media (max-width:480px){.card::before{inset:6px}}
+
+header{text-align:center;display:grid;gap:6px;padding-bottom:18px}
+.est{font-family:var(--caps);letter-spacing:.32em;font-size:12px;color:var(--brass)}
+h1{font-family:var(--display);font-weight:500;font-size:clamp(56px,13vw,104px);line-height:.9;margin:4px 0 0;letter-spacing:.06em;font-variation-settings:"opsz" 96}
+.sub{font-style:italic;color:var(--muted);font-size:17px}
+.flourish{display:flex;align-items:center;gap:12px;justify-content:center;color:var(--brass);margin-top:6px}
+.flourish::before,.flourish::after{content:"";height:1px;width:min(120px,22vw);background:var(--brass)}
+.flourish span{font-size:13px}
+
+nav.tabs{display:flex;justify-content:center;gap:28px;margin:8px 0 18px}
+.tab{font-family:var(--caps);font-size:18px;letter-spacing:.18em;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 2px;border-bottom:1px solid transparent}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brass)}
+.tab:focus-visible,.chip:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+.filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:center;padding:12px 0 16px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:15px}
+.fgroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.flabel{font-family:var(--caps);letter-spacing:.12em;font-size:12px;color:var(--muted)}
+.chip{font:inherit;font-size:14px;border:1px solid var(--rule);background:transparent;color:var(--ink);border-radius:999px;padding:3px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+select{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;max-width:100%}
+.locnote{width:100%;text-align:center;font-size:13px;font-style:italic;color:var(--muted)}
+
+.course{margin-top:30px}
+.course h2{font-family:var(--caps);font-weight:400;text-align:center;font-size:20px;letter-spacing:.24em;margin:0;color:var(--ink);text-wrap:balance}
+.course .date{text-align:center;font-style:italic;color:var(--brass);font-size:15px;margin-top:2px}
+.items{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:20px}
+
+/* Menu items: dish ......... time */
+.item{display:grid;gap:3px}
+.line{display:flex;align-items:baseline;gap:8px;min-width:0}
+.dish{font-family:var(--display);font-style:italic;font-size:22px;line-height:1.2;min-width:0;overflow-wrap:anywhere}
+.leader{flex:1;min-width:24px;border-bottom:2px dotted color-mix(in srgb,var(--muted) 55%,transparent);transform:translateY(-5px)}
+.price{font-variant-numeric:tabular-nums lining-nums;white-space:nowrap;font-size:17px}
+.desc{color:var(--muted);font-size:16px;max-width:60ch}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px;color:var(--muted)}
+.meta .club{font-family:var(--caps);letter-spacing:.08em;color:var(--ink)}
+.meta a{color:var(--brass);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--brass) 40%,transparent)}
+.meta a:hover{border-bottom-color:var(--brass)}
+.tag{font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:3px;background:var(--chip);color:var(--muted)}
+.tag.paid{color:var(--warn)}
+.tag.free{color:var(--ok)}
+
+/* Activities: a programme, time column + entry */
+.prog{display:grid;grid-template-columns:5.2em 1fr;gap:4px 16px;align-items:baseline}
+.ptime{font-variant-numeric:tabular-nums lining-nums;text-align:right;color:var(--brass);font-size:16px;white-space:nowrap}
+.ptitle{font-family:var(--display);font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+.pbody{display:grid;gap:3px;min-width:0}
+.food-mark{color:var(--ok);font-size:14px;font-style:italic}
+@media (max-width:440px){.prog{grid-template-columns:1fr}.ptime{text-align:left}}
+
+/* Sources: the account list, set like a wine list (name ..... vintage) */
+.src-intro{text-align:center;font-style:italic;color:var(--muted);font-size:15px;max-width:52ch;margin:22px auto 0}
+.src-stats{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:14px;color:var(--muted)}
+.src-stats b{font-family:var(--display);font-weight:500;font-size:22px;color:var(--ink);font-variant-numeric:lining-nums;margin-right:4px}
+.src{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.src li{display:grid;gap:1px}
+.src .handle{color:var(--brass);text-decoration:none;font-size:14px}
+.src .handle:hover{text-decoration:underline}
+.tier{font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:3px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.tier.daily{color:var(--ok)}
+.tier.paused{color:var(--warn)}
+.empty{text-align:center;font-style:italic;color:var(--muted);margin:36px 0 8px}
+footer{text-align:center;margin-top:36px;padding-top:16px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted);display:grid;gap:4px}
+footer .fine{font-style:italic}
+@media (prefers-reduced-motion:no-preference){.items>li{animation:ink .45s ease-out both}}
+@keyframes ink{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
+</style>
+
+<main class="card">
+  <header>
+    <div class="est">Babson College · Updated Daily</div>
+    <h1>MENU</h1>
+    <div class="sub">Free food and things to do on campus, read from club Instagram posts</div>
+    <div class="flourish"><span>✦</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-menu" aria-selected="true" aria-controls="panel">Menu</button>
+    <button class="tab" role="tab" id="tab-activities" aria-selected="false" aria-controls="panel">Activities</button>
+    <button class="tab" role="tab" id="tab-sources" aria-selected="false" aria-controls="panel">Sources</button>
+  </nav>
+
+  <section class="filters" aria-label="Filters">
+    <div class="fgroup" id="schools"><span class="flabel">School</span></div>
+    <div class="fgroup"><span class="flabel">When</span>
+      <button class="chip" data-when="today" aria-pressed="false">Today</button>
+      <button class="chip" data-when="week" aria-pressed="false">This week</button>
+      <button class="chip" data-when="all" aria-pressed="true">All</button>
+    </div>
+    <div class="fgroup"><label class="flabel" for="sort">Sort</label>
+      <select id="sort"><option value="date">By date</option><option value="distance">By distance</option></select>
+    </div>
+    <div class="fgroup" id="fromwrap" hidden><label class="flabel" for="from">From</label>
+      <select id="from"></select>
+    </div>
+    <div class="locnote" id="locnote" hidden></div>
+  </section>
+
+  <div id="panel" role="tabpanel" aria-labelledby="tab-menu"></div>
+
+  <footer>
+    <div id="stamp"></div>
+    <div class="fine">Times and places come from each club's post. Tap "See post" to check before you go.</div>
+  </footer>
+</main>
+
+<script id="seed" type="application/json">__SEED__</script>
+<script>
+(() => {
+  const TZ = 'America/New_York';
+  let DATA = JSON.parse(document.getElementById('seed').textContent);
+  const S = { tab: 'menu', when: 'all', sort: 'date', from: 'reynolds', here: null, schools: new Set() };
+  try { const t = localStorage.getItem('menu.tab'); if (['menu', 'activities', 'sources'].includes(t)) S.tab = t; } catch (e) {}
+  if (['#activities', '#sources', '#menu'].includes(location.hash)) S.tab = location.hash.slice(1);
+  let ACCTS = DATA.accounts || [];
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const todayStr = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+  const addDays = (d, n) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  const dayName = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  const longDate = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+  const clock = (iso) => iso ? new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ }).replace(':00', '') : null;
+  const bmap = () => Object.fromEntries(DATA.buildings.map((b) => [b.id, b]));
+
+  function miles(a, b) {
+    const R = 3958.8, r = Math.PI / 180;
+    const dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function origin() {
+    if (S.here) return S.here;
+    const b = bmap()[S.from]; return b ? { lat: b.lat, lng: b.lng } : null;
+  }
+  function distanceOf(e) {
+    const b = bmap()[e.building_id], o = origin();
+    if (!b || !o || b.lat == null || b.approx) return null; // approx = building not mapped yet; don't fake a distance
+    return { mi: miles(o, b) };
+  }
+  function distLabel(e) {
+    if (e.off_campus === 'online') return /online/i.test(e.location_raw || '') ? null : 'Online';
+    if (e.off_campus) return 'Off campus';
+    const d = distanceOf(e);
+    if (!d) return null;
+    const mins = Math.max(1, Math.round(d.mi * 20)); // ~3 mph walking
+    return `${d.mi < 0.1 ? '<0.1' : d.mi.toFixed(1)} mi · ${mins} min walk`;
+  }
+  const place = (e) => {
+    const b = bmap()[e.building_id];
+    const raw = e.location_raw;
+    if (!b && !raw) return 'Location TBA';
+    if (b && raw && !raw.toLowerCase().includes(b.name.toLowerCase().split(' ')[0])) return `${raw} · ${b.name}`;
+    return raw || b.name;
+  };
+
+  function visible() {
+    const today = todayStr();
+    const end = S.when === 'today' ? today : S.when === 'week' ? addDays(today, 6) : '9999';
+    let list = DATA.events.filter((e) => e.date >= today && e.date <= end && (S.schools.size === 0 || S.schools.has(e.school)));
+    list = list.filter((e) => S.tab === 'menu' ? e.tab === 'menu' : true);
+    if (S.sort === 'distance') list.sort((a, b) => (distanceOf(a)?.mi ?? 99) - (distanceOf(b)?.mi ?? 99) || (a.date + (a.start || 'z')).localeCompare(b.date + (b.start || 'z')));
+    else list.sort((a, b) => (a.date + (a.start || 'z')).localeCompare(b.date + (b.start || 'z')));
+    return list;
+  }
+
+  function courseTitle(d) {
+    const t = todayStr();
+    if (d === t) return 'Today';
+    if (d === addDays(t, 1)) return 'Tomorrow';
+    return dayName(d);
+  }
+
+  function tags(e) {
+    const out = [];
+    if (e.tab === 'menu') out.push(e.free_food ? '<span class="tag free">Free</span>' : '<span class="tag paid">' + esc(e.price || 'Price not posted') + '</span>');
+    else if (e.price) out.push(`<span class="tag paid">${esc(e.price)}</span>`);
+    const f = e.flags || [];
+    if (f.includes('ticket_required')) out.push('<span class="tag">Ticket</span>');
+    if (f.includes('signup_required')) out.push('<span class="tag">Sign-up</span>');
+    if (f.includes('grad_only')) out.push('<span class="tag">Grad students</span>');
+    if (f.includes('recurring_weekly')) out.push('<span class="tag">Weekly</span>');
+    if (f.includes('needs_image_parse')) out.push('<span class="tag">Details on flyer</span>');
+    return out.join(' ');
+  }
+
+  function metaRow(e) {
+    const dl = distLabel(e);
+    return `<div class="meta"><span class="club">${esc(e.club)}</span><span>${esc(place(e))}</span>${dl ? `<span>${esc(dl)}</span>` : ''}${tags(e)}${e.post_url ? `<a href="${esc(e.post_url)}" target="_blank" rel="noopener">See post</a>` : ''}</div>`;
+  }
+
+  // Posts often say only "food provided"; a menu lists that as the chef's choice.
+  const dishName = (f) => /^(free\s+)?(food|food\s*(&|and)\s*drinks?|food provided|refreshments|snacks)(\s+provided)?$/i.test((f || '').trim()) ? "Chef's Selection" : f;
+
+  function menuItem(e) {
+    const time = clock(e.start) ? clock(e.start) + (e.end ? '–' + clock(e.end) : '') : 'Time TBA';
+    const when = S.sort === 'distance' ? `${dayName(e.date).slice(0, 3)} ${time}` : time;
+    return `<li class="item">
+      <div class="line"><span class="dish">${esc(dishName(e.food))}</span><span class="leader" aria-hidden="true"></span><span class="price">${esc(when)}</span></div>
+      <div class="desc"><strong>${esc(e.title)}</strong>. ${dishName(e.food) !== e.food ? esc(e.food) + '. ' : ''}${esc(e.description)}</div>
+      ${metaRow(e)}</li>`;
+  }
+
+  function progItem(e) {
+    const time = clock(e.start) || 'TBA';
+    const when = S.sort === 'distance' ? `${dayName(e.date).slice(0, 3)} ${time}` : time;
+    return `<li class="prog"><div class="ptime">${esc(when)}</div><div class="pbody">
+      <div class="ptitle">${esc(e.title)}</div>
+      ${e.food ? `<div class="food-mark">Food: ${esc(e.food)}</div>` : ''}
+      <div class="desc">${esc(e.description)}</div>${metaRow(e)}</div></li>`;
+  }
+
+  // Polling tier mirrors accountsForToday() in the Worker: posted in the last 21 days -> daily, else weekly.
+  function tierOf(a) {
+    if (a.active === 0 || a.active === false) return 'paused';
+    if (!a.last_post_at) return 'weekly';
+    return (Date.now() - Date.parse(a.last_post_at)) / 864e5 <= 21 ? 'daily' : 'weekly';
+  }
+  function ago(iso) {
+    if (!iso) return 'no posts seen';
+    const local = new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+    const d = Math.round((Date.parse(todayStr()) - Date.parse(local)) / 864e5); // calendar days in Eastern time
+    return d <= 0 ? 'posted today' : d === 1 ? 'posted yesterday' : `posted ${d} days ago`;
+  }
+  function renderSources() {
+    const list = ACCTS.filter((a) => S.schools.size === 0 || S.schools.has(a.school))
+      .slice().sort((a, b) => (b.last_post_at || '').localeCompare(a.last_post_at || ''));
+    const counts = { daily: 0, weekly: 0, paused: 0 };
+    list.forEach((a) => counts[tierOf(a)]++);
+    const upcoming = (h) => DATA.events.filter((e) => e.account === h).length;
+    return `<p class="src-intro">Every account Menu reads, newest post first. Active accounts are checked every morning; quiet ones once a week.</p>
+      <div class="src-stats"><span><b>${list.length}</b>accounts</span><span><b>${counts.daily}</b>checked daily</span><span><b>${counts.weekly}</b>weekly</span>${counts.paused ? `<span><b>${counts.paused}</b>paused</span>` : ''}</div>
+      <ul class="src">${list.map((a) => {
+        const t = tierOf(a), n = a.upcoming ?? upcoming(a.handle);
+        return `<li><div class="line"><span class="dish" style="font-size:19px">${esc(a.club)}</span><span class="leader" aria-hidden="true"></span><span class="tier ${t}">${t}</span></div>
+          <div class="meta"><a class="handle" href="https://www.instagram.com/${esc(a.handle)}/" target="_blank" rel="noopener">@${esc(a.handle)}</a><span>${esc(ago(a.last_post_at))}</span>${n ? `<span>${n} upcoming</span>` : ''}</div></li>`;
+      }).join('')}</ul>`;
+  }
+
+  function render() {
+    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.id === 'tab-' + S.tab)));
+    $('#panel').setAttribute('aria-labelledby', 'tab-' + S.tab);
+    document.querySelectorAll('[data-when]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.when === S.when)));
+    $('#fromwrap').hidden = S.sort !== 'distance' || S.tab === 'sources';
+    document.querySelectorAll('[data-when], #sort').forEach((el) => { el.closest('.fgroup').hidden = S.tab === 'sources'; });
+    const g = new Date(DATA.generated_at);
+    $('#stamp').textContent = `${DATA.events.length} listings from ${new Set(DATA.events.map((e) => e.club)).size} clubs · last read ${g.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: TZ })}`;
+    if (S.tab === 'sources') { $('#panel').innerHTML = renderSources(); return; }
+    const list = visible();
+    const item = S.tab === 'menu' ? menuItem : progItem;
+    let html = '';
+    if (!list.length) {
+      html = `<p class="empty">${S.tab === 'menu' ? 'Nothing on the menu for these filters. Clubs post most food events 2–5 days ahead, so check back tomorrow.' : 'No activities match these filters.'}</p>`;
+    } else if (S.sort === 'distance') {
+      html = `<div class="course"><h2>${S.tab === 'menu' ? 'Nearest First' : 'Closest to You'}</h2><div class="date">${esc(S.here ? 'from your location' : 'from ' + (bmap()[S.from]?.name || ''))}</div><ul class="items">${list.map(item).join('')}</ul></div>`;
+    } else {
+      const byDay = new Map();
+      list.forEach((e) => { if (!byDay.has(e.date)) byDay.set(e.date, []); byDay.get(e.date).push(e); });
+      for (const [d, evs] of byDay) html += `<div class="course"><h2>${esc(courseTitle(d))}</h2><div class="date">${esc(longDate(d))}</div><ul class="items">${evs.map(item).join('')}</ul></div>`;
+    }
+    $('#panel').innerHTML = html;
+  }
+
+  function setupControls() {
+    const schools = [...new Set(DATA.events.map((e) => e.school))].sort();
+    $('#schools').insertAdjacentHTML('beforeend', schools.map((s) => `<button class="chip" data-school="${esc(s)}" aria-pressed="false">${esc(s)}</button>`).join(''));
+    const used = new Set(DATA.events.map((e) => e.building_id).filter(Boolean));
+    const opts = [`<option value="__here">My location</option>`].concat(
+      DATA.buildings.filter((b) => !b.approx || used.has(b.id)).sort((a, b) => a.name.localeCompare(b.name))
+        .map((b) => `<option value="${esc(b.id)}"${b.id === S.from ? ' selected' : ''}>${esc(b.name)}</option>`));
+    $('#from').innerHTML = opts.join('');
+
+    document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+      S.tab = t.id.replace('tab-', ''); try { localStorage.setItem('menu.tab', S.tab); } catch (e) {} render();
+    }));
+    document.querySelectorAll('[data-when]').forEach((c) => c.addEventListener('click', () => { S.when = c.dataset.when; render(); }));
+    $('#schools').addEventListener('click', (ev) => {
+      const c = ev.target.closest('[data-school]'); if (!c) return;
+      const s = c.dataset.school; S.schools.has(s) ? S.schools.delete(s) : S.schools.add(s);
+      c.setAttribute('aria-pressed', String(S.schools.has(s))); render();
+    });
+    $('#sort').addEventListener('change', (ev) => { S.sort = ev.target.value; render(); });
+    $('#from').addEventListener('change', (ev) => {
+      const v = ev.target.value, note = $('#locnote');
+      if (v !== '__here') { S.here = null; S.from = v; note.hidden = true; render(); return; }
+      if (!navigator.geolocation) { note.hidden = false; note.textContent = 'Location is not available here. Pick the building you are in instead.'; ev.target.value = S.from; return; }
+      note.hidden = false; note.textContent = 'Finding you…';
+      navigator.geolocation.getCurrentPosition(
+        (p) => { S.here = { lat: p.coords.latitude, lng: p.coords.longitude }; note.textContent = 'Using your location.'; render(); },
+        () => { note.textContent = 'Location was blocked. Pick the building you are in instead.'; ev.target.value = S.from; S.here = null; render(); },
+        { timeout: 8000, maximumAge: 300000 });
+    });
+  }
+
+  setupControls();
+  render();
+
+  // When served by the Worker, replace the embedded snapshot with live data.
+  fetch('api/accounts', { headers: { accept: 'application/json' } })
+    .then((r) => (r.ok && (r.headers.get('content-type') || '').includes('json') ? r.json() : null))
+    .then((live) => { if (live && Array.isArray(live.accounts)) { ACCTS = live.accounts; if (S.tab === 'sources') render(); } })
+    .catch(() => {});
+  fetch('api/events', { headers: { accept: 'application/json' } })
+    .then((r) => (r.ok && (r.headers.get('content-type') || '').includes('json') ? r.json() : null))
+    .then((live) => { if (live && Array.isArray(live.events)) { DATA = live; render(); } })
+    .catch(() => {});
+})();
+</script>

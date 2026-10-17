@@ -1,0 +1,35 @@
+name = "campus-menu"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+# Serves public/index.html (the Menu UI) at /
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/img/*", "/apify-webhook"]
+
+# Daily scrape at 6:40 AM ET during EDT (10:40 UTC). Cron is UTC-only; in EST this fires 5:40 AM, which is fine.
+[triggers]
+crons = ["40 10 * * *", "*/10 * * * *", "30 11 * * *"]  # scrape, parse drain, email digest
+
+[[d1_databases]]
+binding = "DB"
+database_name = "campus-menu"
+database_id = "d9b657dd-e98b-4edf-b0fa-ebae86c0599e"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "campus-menu-images"
+
+[vars]
+APIFY_ACTOR = "apify~instagram-post-scraper"
+CLAUDE_MODEL = "claude-haiku-5-5"
+LOOKBACK_HOURS = "40"          # overlap so a late/failed run never drops a day
+MAX_POSTS_PER_ACCOUNT = "4"
+APIFY_MAX_USD_PER_RUN = "0.50" # hard stop per daily run
+MAX_IMAGES_PER_POST = "4"
+DIGEST_FROM = "Menu <onboarding@resend.dev>"  # resend.dev can only mail your own Resend account; add a domain to send elsewhere
+# PUBLIC_URL is passed at deploy time (--var) by .github/workflows/deploy.yml
+
+# Secrets (set with `wrangler secret put`):
+#   APIFY_TOKEN, ANTHROPIC_API_KEY, WEBHOOK_SECRET, ADMIN_TOKEN, RESEND_API_KEY, DIGEST_TO

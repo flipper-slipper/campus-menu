@@ -1,0 +1,20 @@
+{
+  "name": "campus-menu",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute campus-menu --remote --file=schema.sql && wrangler d1 execute campus-menu --remote --file=seed.sql",
+    "seed": "node scripts/make-seed.mjs > seed.sql",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build:page": "node scripts/build-page.mjs > public/index.html"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^4.40.0"
+  }
+}

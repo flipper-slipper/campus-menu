@@ -1,0 +1,31 @@
+{
+  "_source": "Coordinates from OpenStreetMap (ODbL) via Overpass, 2026-10-17. Entries with approx=true are NOT in OSM and use the campus centroid until pinned by hand.",
+  "school": "Babson College",
+  "centroid": [42.2970, -71.2655],
+  "buildings": [
+    {"id":"reynolds","name":"Reynolds Student Center","lat":42.2969727,"lng":-71.2640799,"aliases":["reynolds","rey's","reys","reynolds campus center","global lounge","reynolds global lounge","sal's pizza"]},
+    {"id":"rogers-pub","name":"Roger's Pub","lat":42.2969727,"lng":-71.2640799,"approx":true,"note":"assumed inside Reynolds; verify","aliases":["roger's pub","rogers pub"]},
+    {"id":"olin-hall","name":"Olin Hall","lat":42.2996107,"lng":-71.2668771,"aliases":["olin hall","olin","capozzi room","design room","design zone","olin cafe","grad student lounge"]},
+    {"id":"van-winkle","name":"Van Winkle Hall (eTower)","lat":42.2950427,"lng":-71.2662088,"aliases":["van winkle","etower","e-tower"]},
+    {"id":"knight","name":"Knight Auditorium","lat":42.2995642,"lng":-71.2680153,"aliases":["knight auditorium","knight"]},
+    {"id":"glavin-chapel","name":"Glavin Family Chapel","lat":42.2971659,"lng":-71.2652618,"aliases":["glavin family chapel","glavin chapel"]},
+    {"id":"sorenson","name":"Sorenson Center for the Arts","lat":42.2972652,"lng":-71.2645490,"aliases":["sorenson","sorenson theater","sandra l. sorenson rehearsal studio","sorenson rehearsal studio"]},
+    {"id":"trim","name":"Trim Dining Hall","lat":42.2966961,"lng":-71.2623129,"aliases":["trim","trim dining hall"]},
+    {"id":"horn","name":"Horn Library","lat":42.2979566,"lng":-71.2659343,"aliases":["horn","horn library"]},
+    {"id":"blank-center","name":"Blank Center","lat":42.2994564,"lng":-71.2657145,"aliases":["blank center","blank"]},
+    {"id":"tomasso","name":"Tomasso Hall","lat":42.2996088,"lng":-71.2647647,"aliases":["tomasso"]},
+    {"id":"hollister","name":"Hollister Building","lat":42.2969251,"lng":-71.2634733,"aliases":["hollister"]},
+    {"id":"park-manor-central","name":"Park Manor Central","lat":42.2983582,"lng":-71.2639879,"aliases":["park manor central"]},
+    {"id":"globe","name":"The Babson Globe","lat":42.2976944,"lng":-71.2640214,"aliases":["the globe","babson globe","globe","campus globe"]},
+    {"id":"barefoot-park","name":"Barefoot Park","lat":42.2964844,"lng":-71.2645763,"aliases":["barefoot park"]},
+    {"id":"webster","name":"Webster Center","lat":42.2984911,"lng":-71.2683175,"aliases":["webster","webster center"]},
+    {"id":"weissman-foundry","name":"Weissman Foundry","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["weissman foundry","foundry","foundry workroom","foundry kitchen"]},
+    {"id":"commons","name":"Babson Commons","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["babson commons","commons"]},
+    {"id":"winn","name":"Winn Auditorium","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["winn","winn auditorium"]},
+    {"id":"gerber","name":"Gerber Hall","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["gerber"]},
+    {"id":"kriebel","name":"Kriebel Hall","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["kriebel"]},
+    {"id":"luksic","name":"Luksic Hall","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["luksic"]},
+    {"id":"johnson-house","name":"Johnson House","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["johnson house"]},
+    {"id":"lgrac","name":"LGRAC (Recreation Center)","lat":42.2970,"lng":-71.2655,"approx":true,"aliases":["lgrac"]}
+  ]
+}
