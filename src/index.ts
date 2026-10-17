@@ -8,8 +8,8 @@ export interface Env {
   ASSETS: Fetcher;
   APIFY_TOKEN: string;
   ANTHROPIC_API_KEY: string;
-  WEBHOOK_SECRET: string;
-  ADMIN_TOKEN: string;
+  WEBHOOK_SECRET?: string; // optional: derived from APIFY_TOKEN when unset
+  ADMIN_TOKEN?: string;    // optional: /api/admin/* is disabled when unset
   APIFY_ACTOR: string;
   CLAUDE_MODEL: string;
   LOOKBACK_HOURS: string;
@@ -36,7 +36,7 @@ export default {
     const url = new URL(req.url);
 
     if (url.pathname === '/apify-webhook' && req.method === 'POST') {
-      if (url.searchParams.get('secret') !== env.WEBHOOK_SECRET) return new Response('forbidden', { status: 403 });
+      if (url.searchParams.get('secret') !== (await webhookSecret(env))) return new Response('forbidden', { status: 403 });
       const body = (await req.json()) as { resource?: { id: string; defaultDatasetId: string; status: string; usageTotalUsd?: number } };
       if (!body.resource) return new Response('bad payload', { status: 400 });
       ctx.waitUntil(ingestRun(env, body.resource));
@@ -54,6 +54,7 @@ export default {
 
     // Manual controls for testing: /api/admin/run, /api/admin/drain
     if (url.pathname.startsWith('/api/admin/')) {
+      if (!env.ADMIN_TOKEN) return new Response('admin endpoints are off: set the ADMIN_TOKEN secret to enable them', { status: 404 });
       if (req.headers.get('authorization') !== `Bearer ${env.ADMIN_TOKEN}`) return new Response('forbidden', { status: 403 });
       if (url.pathname.endsWith('/run')) return Response.json(await startDailyRuns(env, new Date()));
       if (url.pathname.endsWith('/drain')) return Response.json(await drainPending(env));
@@ -83,7 +84,7 @@ async function startDailyRuns(env: Env, now: Date) {
 async function startRun(env: Env, handles: string[], newerThan: string) {
   const self = env.PUBLIC_URL;
   const hooks = btoa(JSON.stringify([
-    { eventTypes: ['ACTOR.RUN.SUCCEEDED', 'ACTOR.RUN.TIMED_OUT', 'ACTOR.RUN.ABORTED'], requestUrl: `${self}/apify-webhook?secret=${env.WEBHOOK_SECRET}` },
+    { eventTypes: ['ACTOR.RUN.SUCCEEDED', 'ACTOR.RUN.TIMED_OUT', 'ACTOR.RUN.ABORTED'], requestUrl: `${self}/apify-webhook?secret=${await webhookSecret(env)}` },
   ]));
   const input = {
     username: handles,
@@ -259,4 +260,14 @@ async function emailDigest(env: Env, dry = false) {
   if (dry || !env.RESEND_API_KEY || !env.DIGEST_TO) return { sent: false, reason: dry ? 'dry run' : 'RESEND_API_KEY or DIGEST_TO not set', ...digest };
   await sendDigest(env.RESEND_API_KEY, env.DIGEST_FROM, env.DIGEST_TO, digest);
   return { sent: true, subject: digest.subject };
+}
+
+/** Shared secret for the Apify webhook. Uses WEBHOOK_SECRET if set, otherwise an HMAC of a fixed label keyed by APIFY_TOKEN,
+ *  so it is unguessable without the Apify token and needs no extra setup. */
+async function webhookSecret(env: Env): Promise<string> {
+  if (env.WEBHOOK_SECRET) return env.WEBHOOK_SECRET;
+  if (!env.APIFY_TOKEN) throw new Error('APIFY_TOKEN is not set');
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.APIFY_TOKEN), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('campus-menu/apify-webhook'));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }

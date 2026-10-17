@@ -44,8 +44,8 @@ One-time setup:
 | `CLOUDFLARE_ACCOUNT_ID` | yes | Cloudflare dashboard → Workers & Pages → Account ID |
 | `APIFY_TOKEN` | yes | Apify → Settings → API & Integrations |
 | `ANTHROPIC_API_KEY` | yes | console.anthropic.com |
-| `WEBHOOK_SECRET` | yes | any long random string |
-| `ADMIN_TOKEN` | yes | any long random string |
+| `WEBHOOK_SECRET` | optional | any long random string. When unset, the Worker derives one from `APIFY_TOKEN`. |
+| `ADMIN_TOKEN` | optional | any long random string. Enables `/api/admin/*` (manual scrape, parse, digest preview); those routes are off without it. |
 | `RESEND_API_KEY` | for email | resend.com → API Keys |
 | `DIGEST_TO` | for email | where the digest goes. With the default `onboarding@resend.dev` sender this must be your Resend account's email; verify a domain in Resend to send anywhere else. |
 
