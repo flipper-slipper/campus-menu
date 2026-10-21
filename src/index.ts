@@ -52,12 +52,13 @@ export default {
       return new Response(obj.body, { headers: { 'content-type': obj.httpMetadata?.contentType ?? 'image/jpeg', 'cache-control': 'public, max-age=604800' } });
     }
 
-    // Manual controls for testing: /api/admin/run, /api/admin/drain
+    // Manual controls (also behind the buttons on /admin): /api/admin/run[?all], /api/admin/drain, /api/admin/digest[?dry]
     if (url.pathname.startsWith('/api/admin/')) {
       if (!env.ADMIN_TOKEN) return new Response('admin endpoints are off: set the ADMIN_TOKEN secret to enable them', { status: 404 });
       if (req.headers.get('authorization') !== `Bearer ${env.ADMIN_TOKEN}`) return new Response('forbidden', { status: 403 });
-      if (url.pathname.endsWith('/run')) return Response.json(await startDailyRuns(env, new Date()));
+      if (url.pathname.endsWith('/run')) return Response.json(url.searchParams.has('all') ? await startAllRuns(env) : await startDailyRuns(env, new Date()));
       if (url.pathname.endsWith('/drain')) return Response.json(await drainPending(env));
+      if (url.pathname.endsWith('/status')) return Response.json(await adminStatus(env));
       if (url.pathname.endsWith('/digest')) return Response.json(await emailDigest(env, url.searchParams.has('dry')));
     }
 
@@ -79,6 +80,32 @@ async function startDailyRuns(env: Env, now: Date) {
   if (active.length) started.push(await startRun(env, active, `${env.LOOKBACK_HOURS} hours`));
   if (quiet.length) started.push(await startRun(env, quiet, '8 days'));
   return { active: active.length, quiet: quiet.length, started };
+}
+
+// Manual "scrape everyone now": every active account with the widest (8-day) lookback.
+// Split into batches so each run stays under APIFY_MAX_USD_PER_RUN instead of being cut off partway.
+const ACCOUNTS_PER_MANUAL_RUN = 20;
+
+async function startAllRuns(env: Env) {
+  const { results } = await env.DB.prepare('SELECT handle FROM accounts WHERE active = 1').all<{ handle: string }>();
+  const handles = results.map((r) => r.handle);
+  const started = [];
+  for (let i = 0; i < handles.length; i += ACCOUNTS_PER_MANUAL_RUN) started.push(await startRun(env, handles.slice(i, i + ACCOUNTS_PER_MANUAL_RUN), '8 days'));
+  return { accounts: handles.length, started };
+}
+
+// What /admin shows: recent scraper runs and where posts are in the parse queue.
+async function adminStatus(env: Env) {
+  const [runs, posts, events] = await env.DB.batch([
+    env.DB.prepare('SELECT run_id, started_at, handles, status, items, new_posts, usd FROM runs ORDER BY started_at DESC LIMIT 10'),
+    env.DB.prepare('SELECT llm_status, COUNT(*) AS n FROM posts GROUP BY llm_status'),
+    env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE status = 'active' AND date >= date('now', '-1 day')"),
+  ]);
+  return {
+    runs: runs.results,
+    posts: Object.fromEntries((posts.results as { llm_status: string; n: number }[]).map((r) => [r.llm_status, r.n])),
+    upcoming_events: (events.results[0] as { n: number }).n,
+  };
 }
 
 async function startRun(env: Env, handles: string[], newerThan: string) {

@@ -50,7 +50,7 @@ One-time setup:
 | `DIGEST_TO` | for email | where the digest goes. With the default `onboarding@resend.dev` sender this must be your Resend account's email; verify a domain in Resend to send anywhere else. |
 
 4. Run the **deploy** workflow (Actions tab → deploy → Run workflow). The run summary prints the site URL.
-5. Kick off the first scrape instead of waiting for tomorrow:
+5. Kick off the first scrape instead of waiting for tomorrow. Easiest: open `https://campus-menu.<you>.workers.dev/admin`, paste your `ADMIN_TOKEN`, and press **Scrape all** (every active account, 8-day lookback, in batches of 20). The same page runs today's scrape, parses pending posts, previews the digest, and shows recent runs. Or from a terminal:
 
 ```bash
 curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" https://campus-menu.<you>.workers.dev/api/admin/run

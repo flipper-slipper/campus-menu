@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Menu Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus+SC&display=swap">
+<style>
+/* Admin controls for the Worker's /api/admin/* routes. Static page: every action still needs ADMIN_TOKEN. */
+:root{
+  --ground:#1f3a2e;--card:#fbf8f0;--ink:#1c2a23;--muted:#5d6b62;--brass:#9a7426;--rule:#d9cfb6;--chip:#efe8d6;--ok:#2f6b47;--warn:#8a5a12;--bad:#9b2c2c;
+  --caps:"Marcellus SC","Trajan Pro",Georgia,serif;
+  --body:"EB Garamond",Garamond,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0c1511;--card:#14211b;--ink:#ece4cf;--muted:#a6ab9c;--brass:#c9a24f;--rule:#2f4237;--chip:#1d2d25;--ok:#7fc29a;--warn:#e0ad5c;--bad:#e08a8a;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#0c1511;--card:#14211b;--ink:#ece4cf;--muted:#a6ab9c;--brass:#c9a24f;--rule:#2f4237;--chip:#1d2d25;--ok:#7fc29a;--warn:#e0ad5c;--bad:#e08a8a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;padding:24px 16px}
+main{max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--rule);outline:1px solid var(--brass);outline-offset:-8px;padding:32px 28px}
+h1{font-family:var(--caps);font-weight:400;letter-spacing:.2em;font-size:24px;text-align:center;margin:0 0 4px}
+.sub{text-align:center;font-style:italic;color:var(--muted);margin:0 0 24px}
+h2{font-family:var(--caps);font-weight:400;letter-spacing:.14em;font-size:14px;color:var(--brass);margin:28px 0 10px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+label{display:block;font-size:15px;color:var(--muted);margin-bottom:4px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1;min-width:0;font:inherit;font-size:15px;padding:7px 10px;border:1px solid var(--rule);border-radius:6px;background:transparent;color:var(--ink)}
+button{font:inherit;font-size:15px;padding:7px 14px;border-radius:6px;border:1px solid var(--rule);background:var(--chip);color:var(--ink);cursor:pointer}
+button.primary{background:var(--ink);color:var(--card);border-color:var(--ink)}
+button:disabled{opacity:.5;cursor:default}
+.action{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px dotted var(--rule)}
+.action p{margin:0;font-size:15px;color:var(--muted)}
+.action strong{display:block;color:var(--ink);font-weight:600;font-size:17px}
+#msg{min-height:1.4em;margin:14px 0 0;font-size:15px}
+#msg.ok{color:var(--ok)}#msg.bad{color:var(--bad)}
+.stats{display:flex;gap:20px;flex-wrap:wrap;font-size:15px}
+.stats b{font-size:22px;display:block;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+th{font-family:var(--caps);font-weight:400;letter-spacing:.08em;font-size:12px;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule)}
+td{padding:5px 6px;border-bottom:1px dotted var(--rule);font-variant-numeric:tabular-nums}
+.wrap{overflow-x:auto}
+pre{white-space:pre-wrap;word-break:break-word;font-size:13px;background:var(--chip);padding:10px;border-radius:6px;max-height:280px;overflow:auto}
+a{color:var(--brass)}
+@media (max-width:520px){main{padding:24px 18px}.action{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body><main>
+<h1>Menu Admin</h1>
+<p class="sub">Manual controls for the scraper. <a href="/">Back to the menu</a></p>
+
+<label for="token">Admin token (the ADMIN_TOKEN repo secret; saved in this browser only)</label>
+<div class="row"><input id="token" type="password" autocomplete="off"><button id="save">Save</button></div>
+
+<h2>Actions</h2>
+<div class="action"><div><strong>Scrape all accounts</strong><p>Every active account, last 8 days of posts. Batches of 20, each capped by APIFY_MAX_USD_PER_RUN.</p></div><button class="primary" data-path="run?all" data-confirm="Start Apify runs for every active account?">Scrape all</button></div>
+<div class="action"><div><strong>Run today's scrape</strong><p>Same as the 6:40 AM cron: recently active accounts plus this weekday's quiet ones.</p></div><button data-path="run">Run</button></div>
+<div class="action"><div><strong>Parse pending posts now</strong><p>Reads up to 8 waiting posts with Claude. The 10-minute cron does this on its own.</p></div><button data-path="drain">Parse</button></div>
+<div class="action"><div><strong>Preview email digest</strong><p>Builds today's digest without sending it.</p></div><button data-path="digest?dry">Preview</button></div>
+<p id="msg"></p>
+<pre id="out" hidden></pre>
+
+<h2>Status <button id="refresh" style="float:right;font-size:13px;padding:2px 10px">Refresh</button></h2>
+<div id="status"><p class="sub" style="text-align:left">Enter your token to see recent runs.</p></div>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const store = { get() { try { return localStorage.getItem('menu-admin-token') || ''; } catch { return ''; } },
+                set(v) { try { localStorage.setItem('menu-admin-token', v); } catch {} } };
+$('#token').value = store.get();
+$('#save').onclick = () => { store.set($('#token').value.trim()); say('Saved.', 'ok'); loadStatus(); };
+
+function say(text, cls) { const m = $('#msg'); m.textContent = text; m.className = cls || ''; }
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function call(path) {
+  const token = $('#token').value.trim();
+  if (!token) throw new Error('Enter your admin token first.');
+  const res = await fetch('/api/admin/' + path, { method: 'POST', headers: { authorization: 'Bearer ' + token } });
+  const text = await res.text();
+  if (res.status === 403) throw new Error('Wrong token.');
+  if (!res.ok) throw new Error(text || res.statusText);
+  try { return JSON.parse(text); } catch { return text; }
+}
+
+document.querySelectorAll('button[data-path]').forEach((b) => b.onclick = async () => {
+  if (b.dataset.confirm && !confirm(b.dataset.confirm)) return;
+  b.disabled = true; say('Working…'); $('#out').hidden = true;
+  try {
+    const r = await call(b.dataset.path);
+    say(b.dataset.path.startsWith('run') ? 'Started. Apify takes a few minutes; posts are then parsed every 10 minutes.' : 'Done.', 'ok');
+    $('#out').textContent = JSON.stringify(r, null, 2); $('#out').hidden = false;
+    loadStatus();
+  } catch (e) { say(e.message, 'bad'); }
+  finally { b.disabled = false; }
+});
+
+async function loadStatus() {
+  if (!$('#token').value.trim()) return;
+  try {
+    const s = await call('status');
+    const p = s.posts || {};
+    $('#status').innerHTML =
+      `<div class="stats"><div><b>${s.upcoming_events}</b>upcoming events</div><div><b>${p.pending || 0}</b>posts waiting</div><div><b>${p.done || 0}</b>parsed</div><div><b>${(p.skipped || 0) + (p.not_event || 0)}</b>not events</div><div><b>${p.error || 0}</b>errors</div></div>` +
+      `<div class="wrap"><table><tr><th>Started</th><th>Accounts</th><th>Status</th><th>Posts</th><th>New</th><th>Cost</th></tr>` +
+      (s.runs.length ? s.runs.map((r) => `<tr><td>${esc(new Date(r.started_at).toLocaleString())}</td><td>${esc(r.handles)}</td><td>${esc(r.status)}</td><td>${esc(r.items ?? '–')}</td><td>${esc(r.new_posts ?? '–')}</td><td>${r.usd != null ? '$' + Number(r.usd).toFixed(2) : '–'}</td></tr>`).join('')
+        : '<tr><td colspan="6">No runs yet.</td></tr>') + '</table></div>';
+  } catch (e) { $('#status').innerHTML = `<p class="sub" style="text-align:left">${esc(e.message)}</p>`; }
+}
+$('#refresh').onclick = loadStatus;
+loadStatus();
+</script>
+</body></html>
